@@ -106,8 +106,21 @@ public class DisorderedMethylationApplication {
 					int readIndex = (b.getReadStart()-1)+blockPos;
 					
 //					System.out.println("Read start="+b.getReadStart()+" offset="+blockPos+" stringLen="+methString.length());
-					// TODO: Do we need to do something different if the mapping is reversed?
+
 					int genomicPos = b.getReferenceStart()+blockPos;
+					
+					// Move the position back one place if the alignment is to the reverse strand so we
+					// merge the signal from CpG pairs.  We need to account for both single end and 
+					// paired end reads.
+					
+					if (r.getFirstOfPairFlag() & r.getReadNegativeStrandFlag()) {
+						genomicPos -= 1;
+					}
+
+					if (!r.getFirstOfPairFlag() & !r.getReadNegativeStrandFlag()) {
+						genomicPos -= 1;
+					}
+					
 					if (methString.charAt(readIndex) == 'Z' ) {
 						cpg_positions.put(genomicPos, true);
 						++meth_count;
